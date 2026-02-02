@@ -1,46 +1,123 @@
-# King Saver - Premium Video Downloader
+# King Saver 👑
 
-The King Saver has been restructured into a high-performance, premium Flutter Android application with a dedicated Node.js backend.
+A premium React Native Android app for downloading social media videos without watermarks.
+
+![React Native](https://img.shields.io/badge/React%20Native-Expo-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Platform](https://img.shields.io/badge/Platform-Android-green)
+
+## Features
+
+- 🎬 **TikTok** - Download videos & slideshows without watermark (fully functional)
+- 📺 **YouTube** - Coming soon
+- 📸 **Instagram** - Coming soon
+- 📘 **Facebook** - Coming soon
+- 🐦 **Twitter/X** - Coming soon
+- 📱 Premium dark UI with gold accents
+- 💾 Auto-save to device gallery
+- 📋 Download history
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Android Studio with emulator, OR
+- Android device with Expo Go app
+
+### Installation
+
+```bash
+# Clone the repo
+cd King-Saver-app
+
+# Install dependencies
+npm install
+
+# Start development server
+npx expo start
+```
+
+### Run on Android
+
+**Option 1: Emulator**
+```bash
+# Press 'a' after expo start
+```
+
+**Option 2: Physical Device**
+1. Install **Expo Go** from Play Store
+2. Scan QR code from terminal
 
 ## Project Structure
 
-```text
+```
 King-Saver-app/
-├── lib/               # Flutter Application Source
-│   ├── main.dart      # Entry point & Theme
-│   ├── screens/       # UI Screens (Home, Splash)
-│   │   └── tabs/      # Feature Tabs (Single, Bulk, History)
-│   ├── services/      # Business Logic & API calls
-│   └── widgets/       # Reusable UI Components (Glassmorphism)
-├── backend/           # Node.js Server & Scraping logic
-│   ├── server.js      # Express API
-│   └── *.js           # Platform-specific scrapers
-├── pubspec.yaml       # Flutter Dependencies
-└── README.md          # Project Documentation
+├── App.tsx                    # Root component
+├── src/
+│   ├── components/            # Reusable UI components
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── VideoCard.tsx
+│   │   ├── PlatformCard.tsx
+│   │   ├── Header.tsx
+│   │   └── LoadingSpinner.tsx
+│   ├── screens/               # App screens
+│   │   ├── HomeScreen.tsx
+│   │   ├── TikTokScreen.tsx
+│   │   ├── GenericPlatformScreen.tsx
+│   │   └── HistoryScreen.tsx
+│   ├── services/              # API & download logic
+│   │   ├── api.ts
+│   │   └── download.ts
+│   ├── storage/               # AsyncStorage utilities
+│   ├── navigation/            # React Navigation
+│   ├── theme/                 # Design tokens
+│   └── types/                 # TypeScript types
+└── docs/
+    └── TESTING.md             # Testing documentation
 ```
 
-## Features
-- **Premium UI**: Dark mode with gold accents and high-end glassmorphic effects.
-- **Multi-Platform Support**: High-speed downloads for TikTok, YouTube, Instagram, Facebook, and Twitter/X.
-- **Bulk Processing**: Efficiently handle multiple links simultaneously.
-- **Download History**: Locally persisted history of your saved content.
+## Testing
 
-## Setup Instructions
+See [docs/TESTING.md](docs/TESTING.md) for detailed testing instructions.
 
-### 1. Backend Setup
-1. Navigate to the `backend/` directory.
-2. Ensure you have Node.js installed.
-3. Install dependencies: `npm install` (Note: You may need to restore `package.json`).
-4. Start the server: `node server.js`
+### Quick Test
 
-### 2. Flutter App Setup
-1. Ensure you have Flutter installed ([flutter.dev](https://flutter.dev)).
-2. Open `lib/services/api_service.dart` and update the `_baseUrl` to match your server's address.
-3. From the project root, run:
-   ```bash
-   flutter pub get
-   flutter run
-   ```
+```bash
+# Check for TypeScript errors
+npx tsc --noEmit
 
-## Development Credits
-Designed & Developed with a focus on visual excellence and speed. 👑
+# Start dev server
+npx expo start
+
+# Build APK
+eas build --platform android --profile preview
+```
+
+## Tech Stack
+
+- **React Native** with Expo SDK 54
+- **TypeScript** for type safety
+- **React Navigation** for navigation
+- **Expo File System** for downloads
+- **Expo Media Library** for gallery access
+- **AsyncStorage** for persistence
+
+## How TikTok Download Works
+
+1. User pastes TikTok URL
+2. App calls TikWM API to get video info
+3. Video metadata displayed (thumbnail, title, stats)
+4. User selects HD/SD quality
+5. Video downloaded to device
+6. Saved to "King Saver" album in gallery
+
+## License
+
+MIT
+
+---
+
+**Made with 👑 by King Saver Team**
