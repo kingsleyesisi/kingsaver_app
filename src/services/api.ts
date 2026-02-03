@@ -1,19 +1,21 @@
 /**
  * API Service
  * Central API client for video information fetching
+ * Uses TikWM API for TikTok and backend server for other platforms
  */
 
 import axios from 'axios';
 import { VideoInfo, Platform, ApiResponse } from '../types';
 
-// TikWM API for TikTok
+// TikWM API for TikTok (direct)
 const TIKTOK_API = 'https://www.tikwm.com/api/';
 
-// For other platforms, we'll use similar free APIs
-// Note: These may require a backend proxy for production use
+// Backend API base URL (King Saver backend)
+// Change this to your deployed backend URL
+const BACKEND_API = 'https://kingsaver.vercel.app'; // or your deployed server URL
 
 /**
- * Fetch TikTok video information
+ * Fetch TikTok video information (uses TikWM API directly)
  */
 export async function getTikTokInfo(url: string): Promise<VideoInfo> {
     try {
@@ -60,57 +62,119 @@ export async function getTikTokInfo(url: string): Promise<VideoInfo> {
 }
 
 /**
- * Fetch YouTube video information
- * Note: Requires backend proxy for full functionality
+ * Fetch YouTube video information via backend
  */
 export async function getYouTubeInfo(url: string): Promise<VideoInfo> {
-    // Extract video ID from URL
-    const videoIdMatch = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    const videoId = videoIdMatch ? videoIdMatch[1] : null;
+    try {
+        const response = await axios.post(`${BACKEND_API}/api/info`, { url });
+        const data = response.data;
 
-    if (!videoId) {
-        throw new Error('Invalid YouTube URL');
+        // Map to our VideoInfo structure
+        return {
+            id: data.id || extractVideoId(url, 'youtube'),
+            title: data.title || 'YouTube Video',
+            author: data.author?.name || data.uploader || 'YouTube Creator',
+            authorAvatar: data.author?.avatar,
+            thumbnail: data.thumbnail,
+            duration: parseInt(data.duration) || 0,
+            type: 'video',
+            platform: 'youtube',
+            downloadUrl: data.play || data.url,
+            hdDownloadUrl: getFormatUrl(data.formats, 'hd'),
+            sdDownloadUrl: getFormatUrl(data.formats, 'sd'),
+            formats: data.formats,
+        };
+    } catch (error: any) {
+        console.error('YouTube API Error:', error.message);
+        throw new Error(error.response?.data?.error || 'Failed to fetch YouTube video');
     }
-
-    // For now, return basic info - full implementation requires backend
-    return {
-        id: videoId,
-        title: 'YouTube Video',
-        author: 'YouTube Creator',
-        thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-        duration: 0,
-        type: 'video',
-        platform: 'youtube',
-        downloadUrl: undefined, // Requires backend processing
-    };
 }
 
 /**
- * Fetch Instagram video information
- * Note: Requires backend proxy for full functionality
+ * Fetch Instagram video information via backend
  */
 export async function getInstagramInfo(url: string): Promise<VideoInfo> {
-    // Instagram API requires authentication or scraping
-    // For demo purposes, return placeholder
-    throw new Error('Instagram download requires backend setup. Please configure the backend API.');
+    try {
+        const response = await axios.post(`${BACKEND_API}/api/instagram/info`, { url });
+        const data = response.data;
+
+        return {
+            id: data.id || Date.now().toString(),
+            title: data.title || data.description?.substring(0, 50) || 'Instagram Post',
+            author: data.uploader || data.uploader_id || 'Instagram User',
+            authorAvatar: undefined,
+            thumbnail: data.thumbnail,
+            duration: parseInt(data.duration) || 0,
+            type: data.type === 'slideshow' || data.images ? 'slideshow' : 'video',
+            platform: 'instagram',
+            downloadUrl: data.play || data.url,
+            hdDownloadUrl: data.play || data.url,
+            sdDownloadUrl: data.play || data.url,
+            images: data.images,
+        };
+    } catch (error: any) {
+        console.error('Instagram API Error:', error.message);
+        throw new Error(error.response?.data?.error || 'Failed to fetch Instagram content');
+    }
 }
 
 /**
- * Fetch Facebook video information
- * Note: Requires backend proxy for full functionality
+ * Fetch Facebook video information via backend
  */
 export async function getFacebookInfo(url: string): Promise<VideoInfo> {
-    // Facebook API requires authentication
-    throw new Error('Facebook download requires backend setup. Please configure the backend API.');
+    try {
+        const response = await axios.post(`${BACKEND_API}/api/facebook/info`, { url });
+        const data = response.data;
+
+        return {
+            id: data.id || Date.now().toString(),
+            title: data.title || 'Facebook Video',
+            author: data.uploader || 'Facebook User',
+            authorAvatar: undefined,
+            thumbnail: data.thumbnail,
+            duration: parseInt(data.duration) || 0,
+            type: 'video',
+            platform: 'facebook',
+            downloadUrl: data.play || data.url,
+            hdDownloadUrl: data.play || data.url,
+            sdDownloadUrl: data.play || data.url,
+        };
+    } catch (error: any) {
+        console.error('Facebook API Error:', error.message);
+        throw new Error(error.response?.data?.error || 'Failed to fetch Facebook video');
+    }
 }
 
 /**
- * Fetch Twitter video information
- * Note: Requires backend proxy for full functionality
+ * Fetch Twitter video information via backend
  */
 export async function getTwitterInfo(url: string): Promise<VideoInfo> {
-    // Twitter API requires authentication
-    throw new Error('Twitter download requires backend setup. Please configure the backend API.');
+    try {
+        const response = await axios.post(`${BACKEND_API}/api/twitter/info`, { url });
+        const data = response.data;
+
+        // Get best quality format
+        const formats = data.formats || [];
+        const bestFormat = formats.find((f: any) => f.height >= 720) || formats[0];
+
+        return {
+            id: data.id || Date.now().toString(),
+            title: data.title || data.description?.substring(0, 50) || 'Twitter Video',
+            author: data.uploader || data.uploader_id || 'Twitter User',
+            authorAvatar: undefined,
+            thumbnail: data.thumbnail,
+            duration: parseInt(data.duration) || 0,
+            type: 'video',
+            platform: 'twitter',
+            downloadUrl: bestFormat?.url || data.play || data.url,
+            hdDownloadUrl: formats.find((f: any) => f.height >= 720)?.url || data.play,
+            sdDownloadUrl: formats.find((f: any) => f.height < 720)?.url || data.play,
+            formats: formats,
+        };
+    } catch (error: any) {
+        console.error('Twitter API Error:', error.message);
+        throw new Error(error.response?.data?.error || 'Failed to fetch Twitter video');
+    }
 }
 
 /**
@@ -156,4 +220,31 @@ export function detectPlatform(url: string): Platform | null {
     }
 
     return null;
+}
+
+// Helper functions
+function extractVideoId(url: string, platform: string): string {
+    if (platform === 'youtube') {
+        const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        return match ? match[1] : Date.now().toString();
+    }
+    return Date.now().toString();
+}
+
+function getFormatUrl(formats: any[], quality: 'hd' | 'sd'): string | undefined {
+    if (!formats || formats.length === 0) return undefined;
+
+    if (quality === 'hd') {
+        // Find highest resolution
+        const hdFormat = formats.find((f: any) =>
+            f.qualityLabel?.includes('1080') || f.qualityLabel?.includes('720')
+        );
+        return hdFormat?.url;
+    } else {
+        // Find lower resolution
+        const sdFormat = formats.find((f: any) =>
+            f.qualityLabel?.includes('480') || f.qualityLabel?.includes('360')
+        );
+        return sdFormat?.url || formats[formats.length - 1]?.url;
+    }
 }

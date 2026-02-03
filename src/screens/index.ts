@@ -3,11 +3,11 @@
  */
 
 export { HomeScreen } from './HomeScreen';
-export { TikTokScreen } from './TikTokScreen';
+export { HistoryScreen } from './HistoryScreen';
 export {
+    TikTokScreen,
     YouTubeScreen,
     InstagramScreen,
     FacebookScreen,
     TwitterScreen,
-} from './GenericPlatformScreen';
-export { HistoryScreen } from './HistoryScreen';
+} from './PlatformDownloaderScreen';

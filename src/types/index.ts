@@ -27,6 +27,18 @@ export interface VideoInfo {
         comments?: number;
         shares?: number;
     };
+    formats?: VideoFormat[];
+}
+
+export interface VideoFormat {
+    itag?: string | number;
+    qualityLabel?: string;
+    container?: string;
+    hasVideo?: boolean;
+    hasAudio?: boolean;
+    url?: string;
+    height?: number;
+    width?: number;
 }
 
 export type Platform = 'tiktok' | 'youtube' | 'instagram' | 'facebook' | 'twitter';

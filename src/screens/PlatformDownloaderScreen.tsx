@@ -1,6 +1,6 @@
 /**
- * TikTokScreen
- * TikTok video downloader screen
+ * PlatformDownloaderScreen
+ * Reusable screen component for all platforms
  */
 
 import React, { useState, useCallback } from 'react';
@@ -12,7 +12,7 @@ import {
     SafeAreaView,
     Alert,
     KeyboardAvoidingView,
-    Platform,
+    Platform as RNPlatform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -22,12 +22,35 @@ import {
     VideoCard,
     LoadingSpinner,
 } from '../components';
-import { getTikTokInfo, downloadVideo, downloadSlideshow } from '../services';
+import {
+    getTikTokInfo,
+    getYouTubeInfo,
+    getInstagramInfo,
+    getFacebookInfo,
+    getTwitterInfo,
+} from '../services';
+import { downloadVideo, downloadSlideshow } from '../services';
 import { addToHistory } from '../storage/asyncStorage';
 import { colors, spacing, fontSize, fontWeight, borderRadius } from '../theme';
-import { VideoInfo, DownloadProgress } from '../types';
+import { VideoInfo, DownloadProgress, Platform } from '../types';
 
-export const TikTokScreen: React.FC = () => {
+interface PlatformDownloaderScreenProps {
+    platform: Platform;
+    platformName: string;
+    platformIcon: string;
+    platformColor: string;
+    placeholder: string;
+    urlPattern: RegExp;
+}
+
+export const PlatformDownloaderScreen: React.FC<PlatformDownloaderScreenProps> = ({
+    platform,
+    platformName,
+    platformIcon,
+    platformColor,
+    placeholder,
+    urlPattern,
+}) => {
     const [url, setUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
@@ -35,15 +58,32 @@ export const TikTokScreen: React.FC = () => {
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
 
+    const getVideoInfoForPlatform = async (videoUrl: string): Promise<VideoInfo> => {
+        switch (platform) {
+            case 'tiktok':
+                return getTikTokInfo(videoUrl);
+            case 'youtube':
+                return getYouTubeInfo(videoUrl);
+            case 'instagram':
+                return getInstagramInfo(videoUrl);
+            case 'facebook':
+                return getFacebookInfo(videoUrl);
+            case 'twitter':
+                return getTwitterInfo(videoUrl);
+            default:
+                throw new Error('Unsupported platform');
+        }
+    };
+
     const handleFetch = useCallback(async () => {
         if (!url.trim()) {
-            Alert.alert('Error', 'Please enter a TikTok URL');
+            Alert.alert('Error', `Please enter a ${platformName} URL`);
             return;
         }
 
         // Validate URL
-        if (!url.toLowerCase().includes('tiktok.com')) {
-            Alert.alert('Error', 'Please enter a valid TikTok URL');
+        if (!urlPattern.test(url.toLowerCase())) {
+            Alert.alert('Error', `Please enter a valid ${platformName} URL`);
             return;
         }
 
@@ -52,15 +92,16 @@ export const TikTokScreen: React.FC = () => {
         setVideoInfo(null);
 
         try {
-            const info = await getTikTokInfo(url);
+            const info = await getVideoInfoForPlatform(url);
             setVideoInfo(info);
         } catch (err: any) {
-            setError(err.message || 'Failed to fetch video information');
-            Alert.alert('Error', err.message || 'Failed to fetch video information');
+            const message = err.message || 'Failed to fetch video information';
+            setError(message);
+            Alert.alert('Error', message);
         } finally {
             setLoading(false);
         }
-    }, [url]);
+    }, [url, platform, platformName, urlPattern]);
 
     const handleDownload = useCallback(async (quality: 'hd' | 'sd') => {
         if (!videoInfo) return;
@@ -70,18 +111,15 @@ export const TikTokScreen: React.FC = () => {
 
         try {
             if (videoInfo.type === 'slideshow' && videoInfo.images) {
-                // Download slideshow images
                 await downloadSlideshow(videoInfo, (progress: DownloadProgress) => {
                     setDownloadProgress(progress.progress);
                 });
             } else {
-                // Download video
                 await downloadVideo(videoInfo, quality, (progress: DownloadProgress) => {
                     setDownloadProgress(progress.progress);
                 });
             }
 
-            // Add to history
             await addToHistory(videoInfo);
 
             Alert.alert(
@@ -105,10 +143,10 @@ export const TikTokScreen: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Header title="TikTok" showBack showLogo={false} />
+            <Header title={platformName} showBack showLogo={false} />
 
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                behavior={RNPlatform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
                 <ScrollView
@@ -117,17 +155,21 @@ export const TikTokScreen: React.FC = () => {
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* TikTok Branding */}
+                    {/* Platform Branding */}
                     <View style={styles.brandingSection}>
-                        <View style={styles.tiktokIcon}>
-                            <Text style={styles.tiktokIconText}>♪</Text>
+                        <View style={[styles.platformIcon, { backgroundColor: platformColor }]}>
+                            {platform === 'tiktok' ? (
+                                <Text style={styles.tiktokIconText}>♪</Text>
+                            ) : (
+                                <Ionicons name={platformIcon as any} size={32} color="#FFF" />
+                            )}
                         </View>
                         <Text style={styles.title}>
-                            Download TikTok Videos{'\n'}
+                            Download {platformName} Videos{'\n'}
                             <Text style={styles.highlight}>Without Watermark</Text>
                         </Text>
                         <Text style={styles.subtitle}>
-                            Paste a TikTok link to download videos in HD quality
+                            Paste a {platformName} link to download videos in HD quality
                         </Text>
                     </View>
 
@@ -136,7 +178,7 @@ export const TikTokScreen: React.FC = () => {
                         <Input
                             value={url}
                             onChangeText={setUrl}
-                            placeholder="Paste TikTok link here..."
+                            placeholder={placeholder}
                             showPasteButton
                             showClearButton
                         />
@@ -165,7 +207,7 @@ export const TikTokScreen: React.FC = () => {
 
                     {/* Loading State */}
                     {loading && (
-                        <LoadingSpinner message="Fetching video magic..." />
+                        <LoadingSpinner message={`Fetching ${platformName} magic...`} />
                     )}
 
                     {/* Error State */}
@@ -197,7 +239,7 @@ export const TikTokScreen: React.FC = () => {
                                 <View style={styles.tipNumber}>
                                     <Text style={styles.tipNumberText}>1</Text>
                                 </View>
-                                <Text style={styles.tipText}>Open TikTok and find a video</Text>
+                                <Text style={styles.tipText}>Open {platformName} and find a video</Text>
                             </View>
                             <View style={styles.tipItem}>
                                 <View style={styles.tipNumber}>
@@ -219,6 +261,62 @@ export const TikTokScreen: React.FC = () => {
     );
 };
 
+// Pre-configured screens for each platform
+export const TikTokScreen: React.FC = () => (
+    <PlatformDownloaderScreen
+        platform="tiktok"
+        platformName="TikTok"
+        platformIcon="musical-notes"
+        platformColor={colors.platforms.tiktok}
+        placeholder="Paste TikTok link here..."
+        urlPattern={/tiktok\.com|vt\.tiktok/i}
+    />
+);
+
+export const YouTubeScreen: React.FC = () => (
+    <PlatformDownloaderScreen
+        platform="youtube"
+        platformName="YouTube"
+        platformIcon="logo-youtube"
+        platformColor={colors.platforms.youtube}
+        placeholder="Paste YouTube link here..."
+        urlPattern={/youtube\.com|youtu\.be/i}
+    />
+);
+
+export const InstagramScreen: React.FC = () => (
+    <PlatformDownloaderScreen
+        platform="instagram"
+        platformName="Instagram"
+        platformIcon="logo-instagram"
+        platformColor={colors.platforms.instagram}
+        placeholder="Paste Instagram link here..."
+        urlPattern={/instagram\.com|instagr\.am/i}
+    />
+);
+
+export const FacebookScreen: React.FC = () => (
+    <PlatformDownloaderScreen
+        platform="facebook"
+        platformName="Facebook"
+        platformIcon="logo-facebook"
+        platformColor={colors.platforms.facebook}
+        placeholder="Paste Facebook link here..."
+        urlPattern={/facebook\.com|fb\.watch|fb\.com/i}
+    />
+);
+
+export const TwitterScreen: React.FC = () => (
+    <PlatformDownloaderScreen
+        platform="twitter"
+        platformName="Twitter / X"
+        platformIcon="logo-twitter"
+        platformColor={colors.platforms.twitter}
+        placeholder="Paste Twitter/X link here..."
+        urlPattern={/twitter\.com|x\.com/i}
+    />
+);
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -238,11 +336,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: spacing.xl,
     },
-    tiktokIcon: {
+    platformIcon: {
         width: 64,
         height: 64,
         borderRadius: 32,
-        backgroundColor: colors.platforms.tiktok,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: spacing.md,
