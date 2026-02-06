@@ -14,6 +14,7 @@ import {
     FacebookScreen,
     TwitterScreen,
     HistoryScreen,
+    BulkDownloadScreen,
 } from '../screens';
 import { RootStackParamList } from '../types';
 import { colors } from '../theme';
@@ -37,6 +38,7 @@ export const AppNavigator: React.FC = () => {
                 <Stack.Screen name="Instagram" component={InstagramScreen} />
                 <Stack.Screen name="Facebook" component={FacebookScreen} />
                 <Stack.Screen name="Twitter" component={TwitterScreen} />
+                <Stack.Screen name="BulkDownload" component={BulkDownloadScreen} />
                 <Stack.Screen name="History" component={HistoryScreen} />
             </Stack.Navigator>
         </NavigationContainer>

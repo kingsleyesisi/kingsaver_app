@@ -42,11 +42,13 @@ npx expo start
 ### Run on Android
 
 **Option 1: Emulator**
+
 ```bash
 # Press 'a' after expo start
 ```
 
 **Option 2: Physical Device**
+
 1. Install **Expo Go** from Play Store
 2. Scan QR code from terminal
 
@@ -93,8 +95,29 @@ npx tsc --noEmit
 npx expo start
 
 # Build APK
-eas build --platform android --profile preview
-```
+### Building the APK (Android)
+
+To verify the app on a real Android device without using Expo Go, you can build a standalone APK.
+
+1.  **Install EAS CLI** (if not already installed):
+    ```bash
+    npm install -g eas-cli
+    ```
+
+2.  **Login to Expo**:
+    ```bash
+    eas login
+    ```
+
+3.  **Build the APK**:
+    ```bash
+    eas build --platform android --profile preview
+    ```
+
+4.  **Download & Install**:
+    -   Once the build finishes, EAS will provide a download link.
+    -   Download the `.apk` file to your Android phone.
+    -   Install it (you may need to allow "Install from Unknown Sources").
 
 ## Tech Stack
 

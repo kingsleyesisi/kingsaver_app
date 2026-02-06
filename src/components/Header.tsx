@@ -9,10 +9,11 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Image,
+    Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, fontSize, fontWeight } from '../theme';
 
 interface HeaderProps {
@@ -29,9 +30,15 @@ export const Header: React.FC<HeaderProps> = ({
     rightAction,
 }) => {
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
+
+    const containerStyle = {
+        paddingTop: insets.top + spacing.sm,
+        height: 60 + insets.top,
+    };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, containerStyle]}>
             {/* Left Section */}
             <View style={styles.leftSection}>
                 {showBack ? (
@@ -124,15 +131,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     brandText: {
-        fontSize: fontSize.xl,
-        fontWeight: fontWeight.bold,
+        fontSize: 24,
+        fontWeight: '800', // Extra bold
         color: colors.text.primary,
+        letterSpacing: 0.5,
     },
     brandGold: {
         color: colors.primary.gold,
     },
     title: {
-        fontSize: fontSize.lg,
+        fontSize: fontSize.xl,
         fontWeight: fontWeight.bold,
         color: colors.text.primary,
     },

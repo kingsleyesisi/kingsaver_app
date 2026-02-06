@@ -66,6 +66,7 @@ export type RootStackParamList = {
     Instagram: undefined;
     Facebook: undefined;
     Twitter: undefined;
+    BulkDownload: undefined;
     History: undefined;
     Settings: undefined;
 };

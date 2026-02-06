@@ -9,8 +9,9 @@ import {
     Text,
     StyleSheet,
     ScrollView,
-    SafeAreaView,
     StatusBar,
+    TouchableOpacity,
+    useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -33,8 +34,8 @@ export const HomeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor={colors.background.darker} />
+        <View style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
             <Header />
 
@@ -59,6 +60,33 @@ export const HomeScreen: React.FC = () => {
                     Select <Text style={styles.goldText}>Platform</Text>
                 </Text>
 
+                <View style={styles.bulkSection}>
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('BulkDownload')}
+                    >
+                        <LinearGradient
+                            colors={[colors.primary.goldDark, colors.primary.gold]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.bulkBanner}
+                        >
+                            <View style={styles.bulkContentLeft}>
+                                <View style={styles.bulkIconCircle}>
+                                    <Ionicons name="layers" size={24} color={colors.text.dark} />
+                                </View>
+                                <View>
+                                    <Text style={styles.bulkBannerTitle}>Bulk Downloader</Text>
+                                    <Text style={styles.bulkBannerSubtitle}>Save multiple videos properly</Text>
+                                </View>
+                            </View>
+                            <View style={styles.bulkArrow}>
+                                <Ionicons name="arrow-forward" size={24} color={colors.text.dark} />
+                            </View>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+
                 <View style={styles.platformGrid}>
                     <TikTokCard onPress={() => navigation.navigate('TikTok')} />
                     <YouTubeCard onPress={() => navigation.navigate('YouTube')} />
@@ -66,18 +94,22 @@ export const HomeScreen: React.FC = () => {
                     <FacebookCard onPress={() => navigation.navigate('Facebook')} />
                     <TwitterCard onPress={() => navigation.navigate('Twitter')} />
 
-                    {/* History Card */}
-                    <View style={styles.historyCard}>
+                    {/* History Card - NOW CLICKABLE */}
+                    <TouchableOpacity
+                        style={styles.historyCard}
+                        activeOpacity={0.7}
+                        onPress={() => navigation.navigate('History')}
+                    >
                         <View style={styles.historyCardInner}>
                             <View style={styles.historyIconContainer}>
-                                <Ionicons name="time" size={28} color={colors.primary.gold} />
+                                <Ionicons name="time" size={32} color={colors.primary.gold} />
                             </View>
                             <Text style={styles.historyCardText}>History</Text>
                             <View style={styles.arrowContainer}>
                                 <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
                             </View>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Features Section */}
@@ -116,7 +148,7 @@ export const HomeScreen: React.FC = () => {
                     <Text style={styles.copyright}>Kings World © 2025</Text>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -183,6 +215,52 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         gap: spacing.md,
         marginBottom: spacing.xl,
+    },
+    bulkSection: {
+        marginBottom: spacing.xl,
+    },
+    bulkBanner: {
+        borderRadius: borderRadius.xl,
+        padding: spacing.lg,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        shadowColor: colors.primary.gold,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    bulkContentLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.md,
+    },
+    bulkIconCircle: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: colors.text.dark,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    bulkBannerTitle: {
+        color: colors.text.dark,
+        fontSize: fontSize.lg,
+        fontWeight: '800',
+    },
+    bulkBannerSubtitle: {
+        color: 'rgba(0,0,0,0.7)',
+        fontSize: fontSize.sm,
+        fontWeight: fontWeight.medium,
+    },
+    bulkArrow: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(0,0,0,0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     historyCard: {
         flex: 1,

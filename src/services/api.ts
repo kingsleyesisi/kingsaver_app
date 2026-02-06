@@ -66,7 +66,7 @@ export async function getTikTokInfo(url: string): Promise<VideoInfo> {
  */
 export async function getYouTubeInfo(url: string): Promise<VideoInfo> {
     try {
-        const response = await axios.post(`${BACKEND_API}/api/info`, { url });
+        const response = await axios.post(`${BACKEND_API}/api/youtube/info`, { url });
         const data = response.data;
 
         // Map to our VideoInfo structure

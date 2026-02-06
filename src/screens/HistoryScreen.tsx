@@ -3,7 +3,7 @@
  * Display download history
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -14,6 +14,7 @@ import {
     Alert,
     Image,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Header, Button } from '../components';
 import { getDownloadHistory, clearHistory, removeFromHistory } from '../storage/asyncStorage';
@@ -31,9 +32,11 @@ export const HistoryScreen: React.FC = () => {
         setLoading(false);
     }, []);
 
-    useEffect(() => {
-        loadHistory();
-    }, [loadHistory]);
+    useFocusEffect(
+        useCallback(() => {
+            loadHistory();
+        }, [loadHistory])
+    );
 
     const handleClearAll = () => {
         Alert.alert(
