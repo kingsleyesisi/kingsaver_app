@@ -32,6 +32,15 @@
         "projectId": "a81382cb-f2de-4561-9066-98900d50825e"
       }
     },
-    "owner": "kingsleyesisi"
+    "owner": "kingsleyesisi",
+    "plugins": [
+      "expo-font"
+    ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a81382cb-f2de-4561-9066-98900d50825e"
+    }
   }
 }
